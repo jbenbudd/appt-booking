@@ -23,6 +23,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install requests  # Needed for API tests
           pip install pytest  # For future testing
 
       # Create service account key file from secret
@@ -85,11 +86,37 @@ jobs:
             --set-env-vars FIREBASE_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
             
       - name: Output Service URLs
+        id: output_urls
         run: |
-          echo "Appointment Types Service: $(gcloud functions describe appointment-types-service --region us-central1 --format='value(httpsTrigger.url)')"
-          echo "Providers Service: $(gcloud functions describe providers-service --region us-central1 --format='value(httpsTrigger.url)')"
-          echo "Customers Service: $(gcloud functions describe customers-service --region us-central1 --format='value(httpsTrigger.url)')"
-          echo "Appointments Service: $(gcloud functions describe appointments-service --region us-central1 --format='value(httpsTrigger.url)')"
+          APPT_TYPES_URL=$(gcloud functions describe appointment-types-service --region us-central1 --format='value(serviceConfig.uri)')
+          PROVIDERS_URL=$(gcloud functions describe providers-service --region us-central1 --format='value(serviceConfig.uri)')
+          CUSTOMERS_URL=$(gcloud functions describe customers-service --region us-central1 --format='value(serviceConfig.uri)')
+          APPOINTMENTS_URL=$(gcloud functions describe appointments-service --region us-central1 --format='value(serviceConfig.uri)')
+          
+          echo "APPT_TYPES_URL=$APPT_TYPES_URL" >> $GITHUB_OUTPUT
+          echo "PROVIDERS_URL=$PROVIDERS_URL" >> $GITHUB_OUTPUT
+          echo "CUSTOMERS_URL=$CUSTOMERS_URL" >> $GITHUB_OUTPUT
+          echo "APPOINTMENTS_URL=$APPOINTMENTS_URL" >> $GITHUB_OUTPUT
+          
+          echo "Appointment Types Service: $APPT_TYPES_URL"
+          echo "Providers Service: $PROVIDERS_URL"
+          echo "Customers Service: $CUSTOMERS_URL"
+          echo "Appointments Service: $APPOINTMENTS_URL"
+          
+      # Run API tests to verify deployment and populate the database
+      - name: Run API Tests
+        env:
+          APPT_TYPES_URL: ${{ steps.output_urls.outputs.APPT_TYPES_URL }}
+          PROVIDERS_URL: ${{ steps.output_urls.outputs.PROVIDERS_URL }}
+          CUSTOMERS_URL: ${{ steps.output_urls.outputs.CUSTOMERS_URL }}
+          APPOINTMENTS_URL: ${{ steps.output_urls.outputs.APPOINTMENTS_URL }}
+        run: |
+          # Add a short delay to ensure all functions are fully deployed and ready
+          echo "Waiting for functions to be fully deployed..."
+          sleep 30
+          
+          echo "Running API tests to verify deployment and populate database..."
+          python test_api.py
 
       # Cleanup service account key file
       - name: Remove service account key file
