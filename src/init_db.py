@@ -233,9 +233,6 @@ async def main():
     """Initialize database with sample data."""
     print("Initializing database with sample data...")
     
-    # Create required indexes
-    await db.create_indexes()
-    
     # Create sample data
     appointment_type_ids = await create_appointment_types()
     provider_ids = await create_providers(appointment_type_ids)

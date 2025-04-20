@@ -106,14 +106,6 @@ jobs:
           echo "Providers Service: $PROVIDERS_URL"
           echo "Customers Service: $CUSTOMERS_URL"
           echo "Appointments Service: $APPOINTMENTS_URL"
-          
-      # Create Firestore indexes
-      - name: Create Firestore Indexes
-        env:
-          FIREBASE_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-        run: |
-          echo "Creating Firestore indexes..."
-          python create_indexes.py
       
       # Run API tests to verify deployment and populate the database
       - name: Run API Tests
