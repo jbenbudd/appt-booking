@@ -34,11 +34,13 @@ jobs:
         run: |
           gcloud auth activate-service-account --key-file=sa-key.json
           gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
-          
-      - name: Install gcloud beta components
+
+      # Make sure required APIs are enabled
+      - name: Enable required APIs
         run: |
-          gcloud components install beta
-          gcloud components install alpha
+          gcloud services enable cloudfunctions.googleapis.com
+          gcloud services enable cloudbuild.googleapis.com
+          gcloud services enable artifactregistry.googleapis.com
 
       - name: Deploy Appointment Types Service
         run: |
