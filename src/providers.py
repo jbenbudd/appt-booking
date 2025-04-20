@@ -5,7 +5,6 @@ import uvicorn
 import uuid
 from typing import List, Optional
 import logging
-import traceback
 
 from src.models import Provider, Availability, WeeklySchedule
 from src.db import FirestoreDB
@@ -137,24 +136,7 @@ async def update_provider_availability(provider_id: str, availability: Availabil
 @functions_framework.http
 def providers_service(request):
     """Cloud Function entry point."""
-    try:
-        # Log debug information
-        logger.info(f"Handling request: {request.method} {request.path}")
-        logger.info(f"Project ID: {db._instance.db._client.project}")
-        
-        # For Cloud Functions Gen 2, we need to handle ASGI conversion
-        return functions_framework.flask_to_function(app)(request)
-    except Exception as e:
-        # Log the error with traceback
-        error_details = traceback.format_exc()
-        logger.error(f"Error in Cloud Function: {str(e)}\n{error_details}")
-        
-        # Return a proper error response
-        return {
-            "statusCode": 500,
-            "body": {
-                "error": str(e),
-                "details": error_details,
-                "message": "Server error occurred. Check Cloud Function logs for details."
-            }
-        } 
+    # For Cloud Functions Gen 2, the Flask request object is passed directly
+    # We need to convert it to WSGI environ format for FastAPI
+    asgi_app = app 
+    return functions_framework.flask_to_function(asgi_app)(request) 
