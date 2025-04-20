@@ -82,4 +82,7 @@ async def delete_appointment_type(type_id: str):
 @functions_framework.http
 def appointment_types_service(request):
     """Cloud Function entry point."""
-    return app(request._environ) 
+    # For Cloud Functions Gen 2, the Flask request object is passed directly
+    # We need to convert it to WSGI environ format for FastAPI
+    asgi_app = app 
+    return functions_framework.flask_to_function(asgi_app)(request) 

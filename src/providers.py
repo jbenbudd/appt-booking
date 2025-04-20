@@ -131,4 +131,7 @@ async def update_provider_availability(provider_id: str, availability: Availabil
 @functions_framework.http
 def providers_service(request):
     """Cloud Function entry point."""
-    return app(request._environ) 
+    # For Cloud Functions Gen 2, the Flask request object is passed directly
+    # We need to convert it to WSGI environ format for FastAPI
+    asgi_app = app 
+    return functions_framework.flask_to_function(asgi_app)(request) 

@@ -45,6 +45,7 @@ jobs:
       - name: Deploy Appointment Types Service
         run: |
           gcloud functions deploy appointment-types-service \
+            --gen2 \
             --runtime python311 \
             --trigger-http \
             --allow-unauthenticated \
@@ -56,6 +57,7 @@ jobs:
       - name: Deploy Providers Service
         run: |
           gcloud functions deploy providers-service \
+            --gen2 \
             --runtime python311 \
             --trigger-http \
             --allow-unauthenticated \
@@ -67,6 +69,7 @@ jobs:
       - name: Deploy Customers Service
         run: |
           gcloud functions deploy customers-service \
+            --gen2 \
             --runtime python311 \
             --trigger-http \
             --allow-unauthenticated \
@@ -78,6 +81,7 @@ jobs:
       - name: Deploy Appointments Service
         run: |
           gcloud functions deploy appointments-service \
+            --gen2 \
             --runtime python311 \
             --trigger-http \
             --allow-unauthenticated \

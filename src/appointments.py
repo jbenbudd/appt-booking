@@ -400,4 +400,7 @@ async def find_available_slots_for_provider(
 @functions_framework.http
 def appointments_service(request):
     """Cloud Function entry point."""
-    return app(request._environ) 
+    # For Cloud Functions Gen 2, the Flask request object is passed directly
+    # We need to convert it to WSGI environ format for FastAPI
+    asgi_app = app 
+    return functions_framework.flask_to_function(asgi_app)(request) 
