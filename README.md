@@ -56,3 +56,15 @@ Each service is deployed as a separate Cloud Function with its own API endpoints
 - `PUT /appointments/{appointment_id}`: Update an appointment
 - `DELETE /appointments/{appointment_id}`: Cancel an appointment
 - `GET /available-slots`: Find available appointment slots
+
+### GitHub Actions Deployment
+
+This project includes a GitHub Actions workflow for automatic deployment:
+
+1. **Set up GitHub Secrets**:
+   - Go to your GitHub repository
+   - Navigate to Settings > Secrets and variables > Actions
+   - Add the following secrets:
+     - `GCP_PROJECT_ID`: Your Google Cloud project ID
+     - `GCP_SA_KEY`: The contents of your service account JSON key file (for deployment)
+     - `FIREBASE_SERVICE_ACCOUNT`: The email address of your Firebase Admin SDK service account (e.g., `firebase-adminsdk-fbsvc@appt-booking-e9d9c.iam.gserviceaccount.com`)

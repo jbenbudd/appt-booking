@@ -1,10 +1,15 @@
-from firebase_admin import credentials, firestore, initialize_app
+from firebase_admin import credentials, firestore, initialize_app, get_app
 from typing import List, Optional, Dict, Any, Type, TypeVar, Generic
 from pydantic import BaseModel
 import os
 import json
 from datetime import datetime
 from google.cloud.firestore_v1.base_query import FieldFilter
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Type variable for generic database operations
 T = TypeVar('T', bound=BaseModel)
@@ -21,26 +26,54 @@ class FirestoreDB:
                 # Cloud Functions automatically have access to the default app credentials
                 # We just need the project ID
                 project_id = os.environ.get('FIREBASE_PROJECT_ID')
-                if project_id:
-                    initialize_app(options={'projectId': project_id})
-                else:
-                    # No project ID provided, use default initialization
-                    initialize_app()
+                logger.info(f"Initializing Firestore in Cloud Function environment with project ID: {project_id}")
+                
+                try:
+                    if project_id:
+                        # Check if app is already initialized
+                        try:
+                            app = get_app()
+                            logger.info("Firebase app already initialized")
+                        except ValueError:
+                            # Initialize with project ID
+                            initialize_app(options={'projectId': project_id})
+                            logger.info("Firebase app initialized with project ID")
+                    else:
+                        # No project ID provided, use default initialization
+                        logger.warning("No FIREBASE_PROJECT_ID env var found, using default initialization")
+                        try:
+                            app = get_app()
+                            logger.info("Firebase app already initialized")
+                        except ValueError:
+                            initialize_app()
+                            logger.info("Firebase app initialized with default settings")
+                except Exception as e:
+                    logger.error(f"Error initializing Firebase app: {str(e)}")
+                    raise
             elif os.environ.get('FIREBASE_CONFIG'):
                 # Running in Cloud Functions older method
                 firebase_config = json.loads(os.environ.get('FIREBASE_CONFIG'))
+                logger.info(f"Initializing with FIREBASE_CONFIG: {firebase_config}")
                 initialize_app(options=firebase_config)
             else:
                 # Local development - use credentials file
                 cred_path = os.environ.get('GOOGLE_CREDENTIALS')
+                logger.info(f"Initializing with credentials file: {cred_path}")
                 if cred_path:
                     cred = credentials.Certificate(cred_path)
                     initialize_app(cred)
                 else:
                     # Try default initialization (likely to fail)
+                    logger.warning("No credentials file found, using default initialization (may fail)")
                     initialize_app()
             
-            cls._instance.db = firestore.client()
+            # Create Firestore client
+            try:
+                cls._instance.db = firestore.client()
+                logger.info(f"Firestore client initialized for project: {cls._instance.db._client.project}")
+            except Exception as e:
+                logger.error(f"Error creating Firestore client: {str(e)}")
+                raise
         return cls._instance
     
     def _convert_to_dict(self, obj: BaseModel) -> Dict[str, Any]:

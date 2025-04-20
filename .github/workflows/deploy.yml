@@ -47,7 +47,8 @@ jobs:
             --entry-point appointment_types_service \
             --source . \
             --region us-central1 \
-            --set-env-vars FIREBASE_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
+            --set-env-vars FIREBASE_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }} \
+            --service-account=${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
       - name: Deploy Providers Service
         run: |
@@ -59,7 +60,8 @@ jobs:
             --entry-point providers_service \
             --source . \
             --region us-central1 \
-            --set-env-vars FIREBASE_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
+            --set-env-vars FIREBASE_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }} \
+            --service-account=${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
       - name: Deploy Customers Service
         run: |
@@ -71,7 +73,8 @@ jobs:
             --entry-point customers_service \
             --source . \
             --region us-central1 \
-            --set-env-vars FIREBASE_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
+            --set-env-vars FIREBASE_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }} \
+            --service-account=${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
       - name: Deploy Appointments Service
         run: |
@@ -83,7 +86,8 @@ jobs:
             --entry-point appointments_service \
             --source . \
             --region us-central1 \
-            --set-env-vars FIREBASE_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
+            --set-env-vars FIREBASE_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }} \
+            --service-account=${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
             
       - name: Output Service URLs
         id: output_urls
