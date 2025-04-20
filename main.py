@@ -8,5 +8,8 @@ from src.providers import providers_service
 from src.customers import customers_service
 from src.appointments import appointments_service
 
+# Print on import to verify the module is loaded
+print("Main module loaded - Cloud Functions imported successfully")
+
 # Expose all the functions for deployment
 # These need to be at the top level of the main.py file for Cloud Functions Gen 2 

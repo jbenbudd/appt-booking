@@ -94,7 +94,26 @@ async def delete_customer(customer_id: str):
 @functions_framework.http
 def customers_service(request):
     """Cloud Function entry point."""
-    # For Cloud Functions Gen 2, the Flask request object is passed directly
-    # We need to convert it to WSGI environ format for FastAPI
-    asgi_app = app 
-    return functions_framework.flask_to_function(asgi_app)(request) 
+    try:
+        logger.info("Customers Service: Received request")
+        # For Cloud Functions Gen 2, the Flask request object is passed directly
+        # We need to convert it to WSGI environ format for FastAPI
+        asgi_app = app 
+        response = functions_framework.flask_to_function(asgi_app)(request)
+        logger.info(f"Customers Service: Processed successfully with status {response.status_code}")
+        return response
+    except Exception as e:
+        logger.error(f"Customers Service ERROR: {str(e)}", exc_info=True)
+        # Return a formatted error response
+        import traceback
+        error_details = {
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }
+        import json
+        from flask import Response
+        return Response(
+            response=json.dumps(error_details),
+            status=500,
+            mimetype="application/json"
+        ) 

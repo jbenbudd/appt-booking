@@ -31,25 +31,39 @@ class FirestoreDB:
                 project_id = os.environ.get('FIREBASE_PROJECT_ID')
                 logger.info(f"Initializing Firebase with project ID: {project_id}")
                 
-                if os.environ.get('FIREBASE_CONFIG'):
-                    # Running in Cloud Functions older method
-                    firebase_config = json.loads(os.environ.get('FIREBASE_CONFIG'))
-                    initialize_app(options=firebase_config)
-                elif project_id:
-                    # Initialize with project ID
-                    initialize_app(options={'projectId': project_id})
-                else:
-                    # Local development - use credentials file
-                    cred_path = os.environ.get('GOOGLE_CREDENTIALS')
-                    if cred_path:
-                        cred = credentials.Certificate(cred_path)
-                        initialize_app(cred)
+                try:
+                    if os.environ.get('FIREBASE_CONFIG'):
+                        # Running in Cloud Functions older method
+                        firebase_config = json.loads(os.environ.get('FIREBASE_CONFIG'))
+                        logger.info(f"Initializing with FIREBASE_CONFIG: {firebase_config}")
+                        initialize_app(options=firebase_config)
+                    elif project_id:
+                        # Initialize with project ID
+                        logger.info(f"Initializing with project ID only: {project_id}")
+                        initialize_app(options={'projectId': project_id})
                     else:
-                        # Try default initialization 
-                        initialize_app()
+                        # Local development - use credentials file
+                        cred_path = os.environ.get('GOOGLE_CREDENTIALS')
+                        if cred_path:
+                            logger.info(f"Initializing with credentials file: {cred_path}")
+                            cred = credentials.Certificate(cred_path)
+                            initialize_app(cred)
+                        else:
+                            # Try default initialization 
+                            logger.info("Attempting default initialization with no params")
+                            initialize_app()
+                    logger.info("Firebase initialization successful")
+                except Exception as e:
+                    logger.error(f"Firebase initialization error: {str(e)}")
+                    raise
             
             # Create Firestore client
-            cls._instance.db = firestore.client()
+            try:
+                cls._instance.db = firestore.client()
+                logger.info("Firestore client created successfully")
+            except Exception as e:
+                logger.error(f"Error creating Firestore client: {str(e)}")
+                raise
             
         return cls._instance
     
