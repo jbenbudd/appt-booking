@@ -17,7 +17,8 @@ from src.models import (
     WeeklySchedule, 
     Customer,
     Appointment,
-    AppointmentStatus
+    AppointmentStatus,
+    TimeSlot
 )
 
 # Initialize database
@@ -119,11 +120,11 @@ async def create_provider_availability(provider_id):
     """Create sample availability for a provider."""
     # Create a standard 9-5 schedule on weekdays
     weekly_schedule = WeeklySchedule(
-        monday=[{"start": time(9, 0), "end": time(17, 0)}],
-        tuesday=[{"start": time(9, 0), "end": time(17, 0)}],
-        wednesday=[{"start": time(9, 0), "end": time(17, 0)}],
-        thursday=[{"start": time(9, 0), "end": time(17, 0)}],
-        friday=[{"start": time(9, 0), "end": time(17, 0)}],
+        monday=[TimeSlot(start="09:00:00", end="17:00:00")],
+        tuesday=[TimeSlot(start="09:00:00", end="17:00:00")],
+        wednesday=[TimeSlot(start="09:00:00", end="17:00:00")],
+        thursday=[TimeSlot(start="09:00:00", end="17:00:00")],
+        friday=[TimeSlot(start="09:00:00", end="17:00:00")],
         saturday=None,
         sunday=None
     )
@@ -231,6 +232,9 @@ async def create_appointments(provider_ids, customer_ids, appointment_type_ids):
 async def main():
     """Initialize database with sample data."""
     print("Initializing database with sample data...")
+    
+    # Create required indexes
+    await db.create_indexes()
     
     # Create sample data
     appointment_type_ids = await create_appointment_types()

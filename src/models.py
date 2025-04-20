@@ -3,6 +3,36 @@ from typing import List, Optional, Dict
 from datetime import datetime, time
 from enum import Enum
 
+def time_to_str(t: time) -> str:
+    """Convert a time object to string in HH:MM:SS format."""
+    return t.strftime("%H:%M:%S") if t else None
+
+def str_to_time(s: str) -> time:
+    """Convert a string in HH:MM:SS format to a time object."""
+    if not s:
+        return None
+    if isinstance(s, time):
+        return s
+    try:
+        hour, minute, second = map(int, s.split(':'))
+        return time(hour, minute, second)
+    except:
+        # Try just hour and minute
+        try:
+            hour, minute = map(int, s.split(':'))
+            return time(hour, minute)
+        except:
+            return None
+
+class TimeSlot(BaseModel):
+    start: str
+    end: str
+    
+    def get_start_time(self) -> time:
+        return str_to_time(self.start)
+    
+    def get_end_time(self) -> time:
+        return str_to_time(self.end)
 
 class AppointmentStatus(str, Enum):
     SCHEDULED = "scheduled"
@@ -31,19 +61,19 @@ class Provider(BaseModel):
 
 
 class WeeklySchedule(BaseModel):
-    monday: Optional[List[Dict[str, time]]] = None  # List of {start: time, end: time}
-    tuesday: Optional[List[Dict[str, time]]] = None
-    wednesday: Optional[List[Dict[str, time]]] = None
-    thursday: Optional[List[Dict[str, time]]] = None
-    friday: Optional[List[Dict[str, time]]] = None
-    saturday: Optional[List[Dict[str, time]]] = None
-    sunday: Optional[List[Dict[str, time]]] = None
+    monday: Optional[List[TimeSlot]] = None
+    tuesday: Optional[List[TimeSlot]] = None
+    wednesday: Optional[List[TimeSlot]] = None
+    thursday: Optional[List[TimeSlot]] = None
+    friday: Optional[List[TimeSlot]] = None
+    saturday: Optional[List[TimeSlot]] = None
+    sunday: Optional[List[TimeSlot]] = None
 
 
 class Availability(BaseModel):
     provider_id: str
     weekly_schedule: WeeklySchedule
-    exceptions: Optional[Dict[str, List[Dict[str, time]]]] = None  # Special dates with different hours
+    exceptions: Optional[Dict[str, List[TimeSlot]]] = None  # Special dates with different hours
     unavailable_dates: Optional[List[datetime]] = None  # Dates when provider is not available
 
 

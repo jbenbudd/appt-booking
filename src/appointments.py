@@ -289,8 +289,11 @@ async def check_provider_availability(
     end_time_time = end_time.time()
     
     for time_slot in day_schedule:
-        if (start_time_time >= time_slot.get('start') and 
-            end_time_time <= time_slot.get('end')):
+        slot_start = time_slot.get_start_time()
+        slot_end = time_slot.get_end_time()
+        
+        if (start_time_time >= slot_start and 
+            end_time_time <= slot_end):
             appointment_in_working_hours = True
             break
     
@@ -368,12 +371,12 @@ async def find_available_slots_for_provider(
             for time_slot in day_schedule:
                 # Generate appointment slots within working hours
                 slot_start = current_date.replace(
-                    hour=time_slot.get('start').hour,
-                    minute=time_slot.get('start').minute
+                    hour=time_slot.get_start_time().hour,
+                    minute=time_slot.get_start_time().minute
                 )
                 slot_end = current_date.replace(
-                    hour=time_slot.get('end').hour, 
-                    minute=time_slot.get('end').minute
+                    hour=time_slot.get_end_time().hour, 
+                    minute=time_slot.get_end_time().minute
                 )
                 
                 # Generate slots at 30-minute intervals (or based on appointment duration)

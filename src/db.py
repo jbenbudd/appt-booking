@@ -143,4 +143,42 @@ class FirestoreDB:
         docs = query.stream()
         
         # Convert to Pydantic models
-        return [self._convert_from_dict(doc.to_dict(), model_class) for doc in docs] 
+        return [self._convert_from_dict(doc.to_dict(), model_class) for doc in docs]
+    
+    async def create_indexes(self):
+        """Create necessary indexes for the application."""
+        try:
+            logger.info("Creating Firestore indexes for appointments...")
+            
+            # Create a composite index for appointments by provider, status, and start_time
+            collection_ref = self.db.collection("appointments")
+            
+            # Unfortunately, we can't directly create indexes via API in client mode
+            # We need to use the Firestore Admin API which requires additional permissions
+            # For now, log the indexes needed so they can be created manually
+            
+            logger.info("Firestore indexes needed:")
+            logger.info("1. Collection: appointments, Fields: provider_id (ASC), status (ASC), start_time (ASC)")
+            logger.info("2. Collection: appointments, Fields: customer_id (ASC), status (ASC), start_time (ASC)")
+            
+            # An alternative is to simply attempt a few queries that would create these indexes
+            # This works because Firestore automatically suggests index creation
+            try:
+                # This will trigger index creation suggestions if indexes don't exist
+                # Provider + status + start_time index
+                collection_ref.where(filter=FieldFilter("provider_id", "==", "dummy"))\
+                              .where(filter=FieldFilter("status", "==", "scheduled"))\
+                              .order_by("start_time").limit(1).get()
+                
+                # Customer + status + start_time index
+                collection_ref.where(filter=FieldFilter("customer_id", "==", "dummy"))\
+                              .where(filter=FieldFilter("status", "==", "scheduled"))\
+                              .order_by("start_time").limit(1).get()
+                
+                logger.info("Index creation triggered successfully")
+            except Exception as e:
+                logger.warning(f"Index creation attempt resulted in: {str(e)}")
+                logger.info("Use the Firestore console to create these indexes manually")
+                
+        except Exception as e:
+            logger.error(f"Error setting up indexes: {str(e)}") 
