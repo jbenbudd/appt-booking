@@ -15,20 +15,29 @@ class FirestoreDB:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(FirestoreDB, cls).__new__(cls)
-            # Initialize app with your Google service credentials
-            # For local development, set GOOGLE_CREDENTIALS environment variable
-            # or use credentials from environment
-            if os.getenv('FIREBASE_CONFIG'):
-                # Running in Cloud Functions
-                firebase_config = json.loads(os.getenv('FIREBASE_CONFIG'))
+            
+            # Different initialization methods based on environment
+            if os.environ.get('FUNCTION_TARGET'):  # We're in a Cloud Function
+                # Cloud Functions automatically have access to the default app credentials
+                # We just need the project ID
+                project_id = os.environ.get('FIREBASE_PROJECT_ID')
+                if project_id:
+                    initialize_app(options={'projectId': project_id})
+                else:
+                    # No project ID provided, use default initialization
+                    initialize_app()
+            elif os.environ.get('FIREBASE_CONFIG'):
+                # Running in Cloud Functions older method
+                firebase_config = json.loads(os.environ.get('FIREBASE_CONFIG'))
                 initialize_app(options=firebase_config)
             else:
-                # Local development
-                cred_path = os.getenv('GOOGLE_CREDENTIALS')
+                # Local development - use credentials file
+                cred_path = os.environ.get('GOOGLE_CREDENTIALS')
                 if cred_path:
                     cred = credentials.Certificate(cred_path)
                     initialize_app(cred)
                 else:
+                    # Try default initialization (likely to fail)
                     initialize_app()
             
             cls._instance.db = firestore.client()
