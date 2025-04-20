@@ -8,12 +8,17 @@ import logging
 
 from src.models import AppointmentType
 from src.db import FirestoreDB
+from src.utils import fastapi_cloud_function_handler
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+app = FastAPI(
+    title="Appointment Types API",
+    description="API for managing appointment types",
+    root_path=""
+)
 db = FirestoreDB()
 
 COLLECTION = "appointment_types"
@@ -87,26 +92,4 @@ async def delete_appointment_type(type_id: str):
 @functions_framework.http
 def appointment_types_service(request):
     """Cloud Function entry point."""
-    try:
-        logger.info("Appointment Types Service: Received request")
-        # For Cloud Functions Gen 2, the Flask request object is passed directly
-        # We need to convert it to WSGI environ format for FastAPI
-        asgi_app = app 
-        response = functions_framework.flask_to_function(asgi_app)(request)
-        logger.info(f"Appointment Types Service: Processed successfully with status {response.status_code}")
-        return response
-    except Exception as e:
-        logger.error(f"Appointment Types Service ERROR: {str(e)}", exc_info=True)
-        # Return a formatted error response
-        import traceback
-        error_details = {
-            "error": str(e),
-            "traceback": traceback.format_exc()
-        }
-        import json
-        from flask import Response
-        return Response(
-            response=json.dumps(error_details),
-            status=500,
-            mimetype="application/json"
-        ) 
+    return fastapi_cloud_function_handler(app, request, "appointment-types-service") 
