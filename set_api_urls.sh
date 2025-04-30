@@ -1,7 +1,6 @@
 #!/bin/bash
 # Script to set environment variables for API testing
 
-# Replace these URLs with your actual deployed Cloud Function URLs
 export APPT_TYPES_URL="https://us-central1-appt-booking-e9d9c.cloudfunctions.net/appointment-types-service"
 export PROVIDERS_URL="https://us-central1-appt-booking-e9d9c.cloudfunctions.net/providers-service"
 export CUSTOMERS_URL="https://us-central1-appt-booking-e9d9c.cloudfunctions.net/customers-service"

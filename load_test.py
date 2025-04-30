@@ -24,7 +24,7 @@ logging.basicConfig(
     ]
 )
 
-# API endpoints - update these with your actual service URLs
+# API endpoints
 API_ENDPOINTS = {
     "appointment_types": "https://appointment-types-service-ianfiofulq-uc.a.run.app/appointment-types",
     "providers": "https://providers-service-ianfiofulq-uc.a.run.app/providers",

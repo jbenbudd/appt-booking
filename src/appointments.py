@@ -236,8 +236,6 @@ async def get_available_slots(
         providers_filter.append(("active", "==", True))
         
         if appointment_type_id:
-            # This is a simplification - Firestore array-contains can only check for one value
-            # In a real implementation, you might need to handle this differently
             providers_filter.append(("appointment_types", "array-contains", appointment_type_id))
     
     providers = await db.list(PROVIDER_COLLECTION, Provider, filters=providers_filter)
@@ -341,9 +339,6 @@ async def find_available_slots_for_provider(
     appointment_duration: int
 ) -> List[AvailableSlot]:
     """Find available time slots for a specific provider."""
-    # This is a simplified implementation that generates slots
-    # In a real implementation, this would need to be more sophisticated
-    
     available_slots = []
     current_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
     
